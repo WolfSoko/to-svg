@@ -1,0 +1,34 @@
+version: 2
+# Konfiguration für Dependabot Updates
+# Siehe: https://docs.github.com/de/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+updates:
+  # Python Abhängigkeiten (nutzt pyproject.toml / requirements.txt)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"   # Alternativen: daily, monthly
+      day: "monday"
+    # Begrenze gleichzeitige PRs um Rauschen zu reduzieren
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    # Gruppierung aller normalen Updates in eine Sammel-PR (optional)
+    groups:
+      all-pip-deps:
+        patterns:
+          - "*"
+    # Sicherheits-Patches werden weiterhin separat (security updates) erstellt
+
+  # GitHub Actions Versionen aktuell halten
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    open-pull-requests-limit: 5
+    groups:
+      gh-actions:
+        patterns:
+          - "*"
+
