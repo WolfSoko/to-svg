@@ -169,7 +169,7 @@ GitHub Actions run tests, type checking, linting and build on pushes & PRs to `m
 
 Badges (replace OWNER/REPO):
 ```
-![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
-![Lint](https://github.com/OWNER/REPO/actions/workflows/lint.yml/badge.svg)
+![CI](https://github.com/WolfSoko/to-svg/actions/workflows/ci.yml/badge.svg)
+![Lint](https://github.com/WolfSoko/to-svg/actions/workflows/lint.yml/badge.svg)
 ```
 Replace OWNER/REPO with your GitHub namespace.
