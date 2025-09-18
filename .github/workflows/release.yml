@@ -1,0 +1,35 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          awk -v tag="$TAG" 'BEGIN{insec=0} \
+            /^## \[/ { \
+              if(insec){exit}; \
+              if($2 ~ "\\["tag"\\]") {insec=1; next} \
+            } \
+            { if(insec) print }' CHANGELOG.md \
+            | sed '/^## \[/d' | sed '/^$/N;/^\n$/D' > RELEASE_NOTES.md
+          echo '--- Release Notes ---'
+          cat RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
