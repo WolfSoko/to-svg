@@ -1,93 +1,95 @@
 # color_vectorize
 
-Tool zur Farb-Vektorisierung (PNG/JPG → SVG) mit:
-- Farbreduktion (KMeans)
-- Glättung (Chaikin / optional Bézier)
-- Polygonvereinfachung (Douglas-Peucker)
-- Löcher (RETR_CCOMP + evenodd)
-- Optionale Strokes je Fläche
-- Überlappung gegen Spalten
-- Alpha-Verarbeitung (flatten / binary)
+Tool for color vectorization (PNG/JPG → SVG) featuring:
+- Color quantization (KMeans)
+- Smoothing (Chaikin / optional Bézier conversion)
+- Polygon simplification (Douglas-Peucker)
+- Hole support (RETR_CCOMP + evenodd fill rule)
+- Optional strokes per shape
+- Overlap dilation to eliminate hairline gaps
+- Alpha handling (flatten / binary)
 
 ## Installation
 ```bash
 python -m venv .venv
-.venv/Scripts/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
+.venv/Scripts/activate  # PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-## Minimal
+## Minimal usage
 ```bash
 python color_vectorize.py eprivacy_logo.png out.svg
 ```
 
-## Wichtige Parameter
-- --colors N               Anzahl Farben (Cluster)
-- --bg #RRGGBB             Hintergrund
-- --min-area PX            Mindestfläche äußere Konturen
-- --min-hole-area PX       Mindestfläche Löcher
-- --smooth N               Chaikin-Iterationen (0–3)
-- --epsilon F              Vereinfachung (0 = aus)
-- --bezier                 Polylinien → kubische Segmente
-- --outline                Strokes aktivieren
-- --outline-color C|auto   Stroke-Farbe oder auto (abgedunkelt)
-- --outline-width F        Strichbreite
-- --overlap PX             Dilation der Maske (Überdeckung gegen Spalten)
-- --precision N            Dezimalstellen Koordinaten
-- --order area-desc|...    Zeichenreihenfolge
-- --alpha-mode ignore|flatten|binary
-- --alpha-threshold T      Schwellwert für Alpha
+## Key parameters
+- `--colors N`              number of color clusters
+- `--bg #RRGGBB`            background color (hex)
+- `--min-area PX`           minimum area of outer contours
+- `--min-hole-area PX`      minimum area of holes
+- `--smooth N`              Chaikin iterations (0–3 typical)
+- `--epsilon F`             Douglas-Peucker tolerance (0 = off)
+- `--bezier`                convert polylines to cubic segments
+- `--outline`               draw strokes around each filled shape
+- `--outline-color C|auto`  stroke color or auto (darkened fill)
+- `--outline-width F`       stroke width
+- `--overlap PX`            dilate mask to overlap adjacent shapes
+- `--precision N`           decimal places for coordinates
+- `--order area-desc|...`   drawing order
+- `--alpha-mode ignore|flatten|binary` alpha processing mode
+- `--alpha-threshold T`     threshold for alpha (0–255)
 
-## Typische Aufrufe
-Saubere Flächen, leichte Glättung, Überdeckung:
+## Typical commands
+Balanced smooth shapes with slight overlap:
 ```bash
 python color_vectorize.py eprivacy_logo.png out.svg --colors 8 --bg "#ffffff" --smooth 2 --epsilon 1.0 --bezier --overlap 1 --precision 4
 ```
-Mit Strokes:
+Add strokes:
 ```bash
 python color_vectorize.py eprivacy_logo.png out.svg --outline --outline-width 2 --overlap 1
 ```
-Alpha weich einbetten (Halos weg):
+Remove alpha halo (soft flatten):
 ```bash
 python color_vectorize.py logo.png out.svg --alpha-mode flatten --alpha-threshold 12 --overlap 1
 ```
-Harte Kanten aus RGBA (transparente Pixel → Hintergrund):
+Hard edges from RGBA:
 ```bash
 python color_vectorize.py logo.png out.svg --alpha-mode binary --alpha-threshold 0
 ```
-Superkontur hinzufügen:
+Add a pre-drawn super contour:
 ```bash
 python color_vectorize.py eprivacy_logo.png out.svg --supercontour eprivacy_logo.svg --contour-width 2
 ```
 
-## Gegen sichtbare Spalten
-1. --overlap 1 (ggf. 2)  
-2. --precision 4 oder 5  
-3. Reihenfolge: große Flächen zuerst (Default area-desc)  
-4. Alpha flatten nutzen bevor quantisiert wird.
+## Avoiding hairline gaps
+1. `--overlap 1` (try 2 if still visible)  
+2. `--precision 4` or `5`  
+3. Ensure large shapes are drawn first (default `area-desc`)  
+4. Use alpha flatten before quantization when original has semi‑transparent edges.
 
-## Feinere Konturen
-- Weniger Zacken: --smooth 1..2 + moderates --epsilon (0.8–1.5)
-- Möglichst original: --smooth 0 --epsilon 0
-- Bézier weicher, aber mehr Punkte: --bezier
+## Finer contours
+- Fewer jaggies: `--smooth 1..2` + moderate `--epsilon (0.8–1.5)`
+- Maximum fidelity: `--smooth 0 --epsilon 0`
+- Bézier gives smoother organic look but more path data.
 
-## Performance Hinweise
-- Große Bilder vorher skalieren
-- Weniger Farben = schneller
-- Hohe Overlap + viele Farben → mehr Pfade
+## Performance notes
+- Downscale huge images beforehand.
+- Fewer colors = faster.
+- High overlap + many colors = more nodes.
 
-## Nachbearbeitung
-Optional Optimierung mit svgo / scour:
+## Post optimization
+Use svgo / scour if needed:
 ```bash
 npx svgo out.svg -o out.min.svg
 ```
 
-## Fehlerbehebung
-- NameError / ModuleNotFound: Abhängigkeiten installieren
-- Leeres SVG: Bildpfad prüfen
-- Augen fehlen: --min-hole-area senken (z.B. 2)
-- Farb-Ausfransungen: Alpha flatten + overlap
+## Troubleshooting
+| Issue | Fix |
+|-------|-----|
+| Empty SVG | Check input path |
+| Missing holes (eyes) | Lower `--min-hole-area` (e.g. 2) |
+| Fringe / halos | `--alpha-mode flatten` + overlap |
+| Too many micro shapes | Raise `--min-area` |
+| Shapes too blocky | Lower `--epsilon`, add `--smooth 1` |
 
-## Lizenz
-Eigener Gebrauch / Wolfram Sokollek fragen
-
+## License
+Internal / adapt as needed.

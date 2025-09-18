@@ -6,7 +6,7 @@ import argparse
 import xml.etree.ElementTree as ET
 import math
 
-# Neu: Hilfsfunktionen für Alpha / Farben
+# Helper: parse hex color to RGB tuple
 def parse_hex_color(s):
     s = s.strip()
     if s.startswith('#'):
@@ -14,13 +14,13 @@ def parse_hex_color(s):
     if len(s) == 3:
         s = ''.join(c*2 for c in s)
     if len(s) != 6:
-        raise ValueError("Ungültige Farb-Hex: expected 3 oder 6 Stellen")
+        raise ValueError("Invalid hex color: expected 3 or 6 digits")
     r = int(s[0:2], 16)
     g = int(s[2:4], 16)
     b = int(s[4:6], 16)
     return (r, g, b)
 
-
+# Color quantization via KMeans
 def quantize_image(image, n_colors=8):
     data = image.reshape((-1, 3))
     kmeans = KMeans(n_clusters=n_colors, n_init=4, random_state=42)
@@ -29,11 +29,11 @@ def quantize_image(image, n_colors=8):
     quant = palette[labels].reshape(image.shape)
     return quant, labels.reshape(image.shape[:2]), palette
 
-
+# Binary mask for one color cluster
 def mask_for_color(label_img, color_idx):
     return (label_img == color_idx).astype(np.uint8) * 255
 
-
+# Chaikin corner cutting for smoothing polygons
 def chaikin(points, iterations):
     pts = points.astype(float)
     for _ in range(int(max(0, iterations))):
@@ -47,11 +47,11 @@ def chaikin(points, iterations):
         pts = np.array(new_pts)
     return pts
 
-# Neue Utility für dynamische Präzision
+# Formatting helper for coordinate precision
 def fmt_point(p, precision):
     return f"{p[0]:.{precision}f} {p[1]:.{precision}f}"
 
-
+# Convert polygon edges to cubic Bézier segments (simple linear subdivision)
 def poly_to_cubic_beziers(points, precision):
     path = f"M {fmt_point(points[0], precision)} "
     for i in range(1, len(points)):
@@ -66,7 +66,7 @@ def poly_to_cubic_beziers(points, precision):
     path += "Z"
     return path
 
-
+# Build path string from points
 def contour_points_to_path(points, bezier=False, precision=2):
     if bezier:
         return poly_to_cubic_beziers(points, precision)
@@ -76,7 +76,7 @@ def contour_points_to_path(points, bezier=False, precision=2):
     d += "Z"
     return d
 
-
+# Simplify + smooth contour points
 def prepare_points(cnt, epsilon=0.0, smooth=0):
     pts = cnt.squeeze()
     if pts.ndim != 2:
@@ -90,12 +90,12 @@ def prepare_points(cnt, epsilon=0.0, smooth=0):
         pts = chaikin(pts, smooth)
     return pts
 
-
+# Darken color for auto stroke
 def darken_rgb(rgb, factor=0.6):
     r, g, b = rgb
     return (max(0, int(r * factor)), max(0, int(g * factor)), max(0, int(b * factor)))
 
-
+# Add external super contour paths to drawing
 def add_supercontour(dwg, svg_path, stroke_color="black", stroke_width=2):
     tree = ET.parse(svg_path)
     root = tree.getroot()
@@ -105,7 +105,7 @@ def add_supercontour(dwg, svg_path, stroke_color="black", stroke_width=2):
         if d_attr:
             dwg.add(dwg.path(d=d_attr, fill='none', stroke=stroke_color, stroke_width=stroke_width))
 
-
+# Collect outer contours plus holes (compound path via evenodd)
 def build_compound_paths(contours, hierarchy, min_area, min_hole_area, epsilon, smooth, bezier, precision):
     results = []
     if hierarchy is None:
@@ -143,7 +143,7 @@ def build_compound_paths(contours, hierarchy, min_area, min_hole_area, epsilon, 
         results.append({'d': path_d, 'area': area_outer})
     return results
 
-# NEU: Masken-Dilation für Überlappung
+# Dilate mask to create overlap and avoid gaps
 def dilate_mask(mask, overlap):
     if overlap <= 0:
         return mask
@@ -153,7 +153,7 @@ def dilate_mask(mask, overlap):
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * radius + 1, 2 * radius + 1))
     return cv2.dilate(mask, k)
 
-
+# Main conversion routine
 def image_to_svg(input_path, output_path, n_colors=8, min_area=50, bg_color='#ffffff',
                  supercontour=None, contour_color='black', contour_width=2,
                  smooth=0, epsilon=0.0, bezier=False,
@@ -161,25 +161,24 @@ def image_to_svg(input_path, output_path, n_colors=8, min_area=50, bg_color='#ff
                  outline_join='round', outline_cap='round', min_hole_area=5,
                  overlap=0.0, precision=2, order='area-desc',
                  alpha_mode='ignore', alpha_threshold=0):
-    # Eingabe lesen (ggf. mit Alpha)
+    # Decide loading flags (keep alpha if we want to process it)
     flags = cv2.IMREAD_UNCHANGED if alpha_mode != 'ignore' else cv2.IMREAD_COLOR
     raw = cv2.imread(str(input_path), flags)
     if raw is None:
-        raise FileNotFoundError(f"Bild nicht gefunden: {input_path}")
+        raise FileNotFoundError(f"Image not found: {input_path}")
 
     bg_rgb = parse_hex_color(bg_color)
 
+    # Alpha handling
     if raw.ndim == 3 and raw.shape[2] == 4 and alpha_mode != 'ignore':
         bgr = raw[:, :, :3]
         alpha = raw[:, :, 3]
         if alpha_mode == 'flatten':
             a = (alpha.astype(np.float32) / 255.0)
             a = np.clip(a, 0, 1)
-            # Schwellwert: alles <= threshold als 0 behandeln (voll transparent)
             if alpha_threshold > 0:
                 a = np.where(alpha <= alpha_threshold, 0.0, a)
             bg_arr = np.array(bg_rgb, dtype=np.float32)[None, None, :]
-            # BGR -> RGB nach cv2-Konventionen anpassen später
             rgb_src = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB).astype(np.float32)
             comp = (rgb_src * a[..., None] + bg_arr * (1.0 - a[..., None]))
             img_rgb = comp.astype(np.uint8)
@@ -188,15 +187,13 @@ def image_to_svg(input_path, output_path, n_colors=8, min_area=50, bg_color='#ff
             rgb_src = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
             img_rgb = rgb_src.copy()
             img_rgb[~mask] = bg_rgb
-        else:  # sollte nicht eintreten
+        else:
             img_rgb = cv2.cvtColor(raw[:, :, :3], cv2.COLOR_BGR2RGB)
     else:
-        # Kein Alpha oder ignoriert
         if raw.ndim == 2:
             img_rgb = cv2.cvtColor(raw, cv2.COLOR_GRAY2RGB)
         else:
-            # raw BGR
-            if raw.shape[2] == 4:  # Alpha vorhanden aber ignoriert
+            if raw.shape[2] == 4:
                 raw = raw[:, :, :3]
             img_rgb = cv2.cvtColor(raw, cv2.COLOR_BGR2RGB)
 
@@ -246,34 +243,33 @@ def image_to_svg(input_path, output_path, n_colors=8, min_area=50, bg_color='#ff
         add_supercontour(dwg, supercontour, stroke_color=contour_color, stroke_width=contour_width)
 
     dwg.save()
-    print(f"SVG gespeichert unter {output_path}")
+    print(f"SVG written to {output_path}")
 
-
+# CLI entry point
 def main():
-    parser = argparse.ArgumentParser(description="Farbbild zu farbigem SVG vektorisieren (Alpha-Optionen, Löcher, Strokes, Overlap)")
+    parser = argparse.ArgumentParser(description="Vectorize a raster image into a multi-color SVG with smoothing, holes, overlap, strokes, and alpha handling.")
     parser.add_argument("input")
     parser.add_argument("output")
-    parser.add_argument("--colors", type=int, default=8)
-    parser.add_argument("--min-area", type=float, default=50, help="Min Fläche äußerer Konturen")
-    parser.add_argument("--min-hole-area", type=float, default=5, help="Min Fläche von Löchern (Augen)")
-    parser.add_argument("--bg", default="#ffffff")
-    parser.add_argument("--supercontour")
-    parser.add_argument("--contour-color", default="black")
-    parser.add_argument("--contour-width", type=float, default=2)
-    parser.add_argument("--smooth", type=int, default=0, help="Chaikin-Iterationen")
-    parser.add_argument("--epsilon", type=float, default=0.0, help="Douglas-Peucker Toleranz")
-    parser.add_argument("--bezier", action="store_true", help="Polylinien in kubische Bézier umwandeln")
-    parser.add_argument("--outline", action="store_true", help="Farbflächen mit Stroke zeichnen")
-    parser.add_argument("--outline-color", default='auto', help="Stroke-Farbe oder 'auto'")
-    parser.add_argument("--outline-width", type=float, default=1.5)
-    parser.add_argument("--outline-join", default='round', choices=['miter','round','bevel'])
-    parser.add_argument("--outline-cap", default='round', choices=['butt','round','square'])
-    parser.add_argument("--overlap", type=float, default=0.0, help="Masken-Dilation in Pixeln zur Überlappung")
-    parser.add_argument("--precision", type=int, default=3, help="Dezimalstellen für Koordinaten (>=2)")
-    parser.add_argument("--order", default='area-desc', choices=['area-desc','area-asc','orig'], help="Zeichenreihenfolge")
-    # Neu: Alpha Parameter
-    parser.add_argument("--alpha-mode", choices=['ignore','flatten','binary'], default='ignore', help="Alpha-Verarbeitung")
-    parser.add_argument("--alpha-threshold", type=int, default=0, help="Schwellwert für Alpha (0-255)")
+    parser.add_argument("--colors", type=int, default=8, help="Number of color clusters")
+    parser.add_argument("--min-area", type=float, default=50, help="Min area of outer contours")
+    parser.add_argument("--min-hole-area", type=float, default=5, help="Min area of holes")
+    parser.add_argument("--bg", default="#ffffff", help="Background color hex")
+    parser.add_argument("--supercontour", help="SVG file whose paths are added as an outline layer")
+    parser.add_argument("--contour-color", default="black", help="Stroke color for super contour")
+    parser.add_argument("--contour-width", type=float, default=2, help="Stroke width for super contour")
+    parser.add_argument("--smooth", type=int, default=0, help="Chaikin smoothing iterations")
+    parser.add_argument("--epsilon", type=float, default=0.0, help="Douglas-Peucker tolerance (0 disables)")
+    parser.add_argument("--bezier", action="store_true", help="Convert line segments to cubic Béziers")
+    parser.add_argument("--outline", action="store_true", help="Draw each filled shape with a stroke")
+    parser.add_argument("--outline-color", default='auto', help="Stroke color or 'auto' for darkened fill")
+    parser.add_argument("--outline-width", type=float, default=1.5, help="Stroke width for shape outlines")
+    parser.add_argument("--outline-join", default='round', choices=['miter','round','bevel'], help="Stroke line join")
+    parser.add_argument("--outline-cap", default='round', choices=['butt','round','square'], help="Stroke line cap")
+    parser.add_argument("--overlap", type=float, default=0.0, help="Mask dilation in pixels to eliminate gaps")
+    parser.add_argument("--precision", type=int, default=3, help="Decimal places for coordinates (>=2)")
+    parser.add_argument("--order", default='area-desc', choices=['area-desc','area-asc','orig'], help="Drawing order")
+    parser.add_argument("--alpha-mode", choices=['ignore','flatten','binary'], default='ignore', help="Alpha handling mode")
+    parser.add_argument("--alpha-threshold", type=int, default=0, help="Alpha threshold (0-255)")
     args = parser.parse_args()
 
     image_to_svg(
@@ -300,7 +296,6 @@ def main():
         alpha_mode=args.alpha_mode,
         alpha_threshold=max(0, min(255, args.alpha_threshold))
     )
-
 
 if __name__ == "__main__":
     main()
