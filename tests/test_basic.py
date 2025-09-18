@@ -17,9 +17,18 @@ def test_image_to_svg(tmp_path):
     assert "<path" in txt, "No path elements in SVG"
 
 
+def test_palette(tmp_path):
+    input_img = ROOT / "eprivacy_logo.png"
+    out_file = tmp_path / "pal.svg"
+    # Limit to 3 fixed colors
+    image_to_svg(str(input_img), str(out_file), palette="#003366,#ffffff,#111111", outline=False)
+    txt = out_file.read_text(encoding="utf-8")
+    # Expect only these three rgb values (allow case-insensitive search)
+    assert "#003366" in txt.lower() or "rgb(0, 51, 102)" in txt.lower()
+
+
 def test_cli_help():
     # Use wrapper script to ensure CLI works without installation
     proc = subprocess.run([sys.executable, str(ROOT / "color_vectorize.py"), "-h"], capture_output=True, text=True)
     assert proc.returncode == 0
     assert "Vectorize" in proc.stdout or "vectorize" in proc.stdout
-

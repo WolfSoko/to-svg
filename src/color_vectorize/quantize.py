@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 from sklearn.cluster import KMeans
 
-__all__ = ["quantize_image"]
+__all__ = ["quantize_image", "quantize_with_palette"]
 
 def quantize_image(image, n_colors: int = 8):
     data = image.reshape((-1, 3))
@@ -12,3 +12,14 @@ def quantize_image(image, n_colors: int = 8):
     quant = palette[labels].reshape(image.shape)
     return quant, labels.reshape(image.shape[:2]), palette
 
+
+def quantize_with_palette(image, palette_list):
+    palette = np.array(palette_list, dtype=np.uint8)
+    # compute distance to palette
+    img_flat = image.reshape(-1, 3).astype(np.int16)
+    pal = palette.astype(np.int16)
+    # squared distances
+    dists = np.sum((img_flat[:, None, :] - pal[None, :, :]) ** 2, axis=2)
+    labels = np.argmin(dists, axis=1)
+    quant = palette[labels].reshape(image.shape)
+    return quant, labels.reshape(image.shape[:2]), palette
