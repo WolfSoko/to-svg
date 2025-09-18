@@ -1,14 +1,18 @@
 # Basic tests for color_vectorize using synthetic images (no external asset dependency)
-import sys, pathlib, subprocess, re
-import numpy as np
+import pathlib
+import re
+import subprocess
+import sys
+
 import cv2
+import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+if str(SRC) not in sys.path:  # noqa: E402
+    sys.path.insert(0, str(SRC))  # noqa: E402
 
-from color_vectorize import image_to_svg  # type: ignore
+from color_vectorize import image_to_svg  # type: ignore  # noqa: E402
 
 
 def make_test_image(path: pathlib.Path):

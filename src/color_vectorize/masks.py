@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import cv2
 import numpy as np
-from .geometry import prepare_points, contour_points_to_path
+
+from .geometry import contour_points_to_path, prepare_points
 
 __all__ = [
     "mask_for_color",
@@ -57,4 +59,3 @@ def build_compound_paths(contours, hierarchy, min_area, min_hole_area, epsilon, 
             child = hier[child][0]
         results.append({'d': path_d, 'area': outer_area})
     return results
-

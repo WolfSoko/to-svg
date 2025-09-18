@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import cv2
 import numpy as np
 
@@ -62,4 +63,3 @@ def prepare_points(cnt: np.ndarray, epsilon: float = 0.0, smooth: int = 0):
     if smooth > 0:
         pts = chaikin(pts, smooth)
     return pts
-

@@ -13,7 +13,10 @@ Typical smooth pleasant result:
 This is a thin wrapper around color_vectorize.image_to_svg adding sane defaults and existence checks.
 """
 from __future__ import annotations
-import argparse, pathlib, sys
+
+import argparse
+import pathlib
+import sys
 
 # Make sure package import works when running from repo root
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -21,7 +24,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from color_vectorize import image_to_svg  # type: ignore
+from color_vectorize import image_to_svg  # type: ignore  # noqa: E402
 
 PRESET_DEFAULTS = {
     "smooth-contours": dict(smooth=2, epsilon=1.0, bezier=True, overlap=1.0, outline=True, outline_width=2.0, min_hole_area=2.0),
@@ -100,4 +103,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "color-vectorize"
-version = "0.2.1"
+version = "0.2.2"
 description = "Multi-color raster to SVG vectorization with smoothing, Bézier, hole support, overlap, strokes, alpha handling"
 authors = [ { name = "Your Name" } ]
 license = { file = "LICENSE" }

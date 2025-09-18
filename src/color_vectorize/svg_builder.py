@@ -1,17 +1,20 @@
 from __future__ import annotations
-import svgwrite
-import cv2
-import numpy as np
-import xml.etree.ElementTree as ET
+
 import logging
-from .quantize import quantize_image, quantize_with_palette
-from .masks import mask_for_color, dilate_mask, build_compound_paths
-from .utils import darken_rgb, parse_hex_color, parse_palette
+import xml.etree.ElementTree as ET
+
+import cv2
+import svgwrite
+
 from .alpha import load_image_rgba_handled
+from .masks import build_compound_paths, dilate_mask, mask_for_color
+from .quantize import quantize_image, quantize_with_palette
+from .utils import darken_rgb, parse_palette
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["image_to_svg"]
+
 
 def add_supercontour(dwg: svgwrite.Drawing, svg_path: str, stroke_color: str = "black", stroke_width: float = 2.0):
     logger.info("Adding super contour layer from %s", svg_path)
@@ -27,16 +30,36 @@ def add_supercontour(dwg: svgwrite.Drawing, svg_path: str, stroke_color: str = "
     logger.debug("Added %d super contour paths", added)
 
 
-def image_to_svg(input_path: str, output_path: str, n_colors: int = 8, min_area: float = 50, bg_color: str = '#ffffff',
-                 supercontour: str | None = None, contour_color: str = 'black', contour_width: float = 2,
-                 smooth: int = 0, epsilon: float = 0.0, bezier: bool = False,
-                 outline: bool = False, outline_color: str = 'auto', outline_width: float = 1.5,
-                 outline_join: str = 'round', outline_cap: str = 'round', min_hole_area: float = 5,
-                 overlap: float = 0.0, precision: int = 2, order: str = 'area-desc',
-                 alpha_mode: str = 'ignore', alpha_threshold: int = 0,
-                 palette: str | None = None):
+def image_to_svg(
+    input_path: str,
+    output_path: str,
+    n_colors: int = 8,
+    min_area: float = 50,
+    bg_color: str = '#ffffff',
+    supercontour: str | None = None,
+    contour_color: str = 'black',
+    contour_width: float = 2,
+    smooth: int = 0,
+    epsilon: float = 0.0,
+    bezier: bool = False,
+    outline: bool = False,
+    outline_color: str = 'auto',
+    outline_width: float = 1.5,
+    outline_join: str = 'round',
+    outline_cap: str = 'round',
+    min_hole_area: float = 5,
+    overlap: float = 0.0,
+    precision: int = 2,
+    order: str = 'area-desc',
+    alpha_mode: str = 'ignore',
+    alpha_threshold: int = 0,
+    palette: str | None = None,
+):
     logger.info("Vectorizing %s -> %s", input_path, output_path)
-    logger.debug("Params: n_colors=%d smooth=%d eps=%.3f bezier=%s overlap=%.2f outline=%s alpha_mode=%s palette=%s", n_colors, smooth, epsilon, bezier, overlap, outline, alpha_mode, palette)
+    logger.debug(
+        "Params: n_colors=%d smooth=%d eps=%.3f bezier=%s overlap=%.2f outline=%s alpha_mode=%s palette=%s",
+        n_colors, smooth, epsilon, bezier, overlap, outline, alpha_mode, palette,
+    )
     rgb = load_image_rgba_handled(input_path, bg_color, alpha_mode=alpha_mode, alpha_threshold=alpha_threshold)
     h, w = rgb.shape[:2]
     logger.debug("Loaded image size=%dx%d", w, h)
@@ -85,9 +108,15 @@ def image_to_svg(input_path: str, output_path: str, n_colors: int = 8, min_area:
 
     for rec in path_records:
         if outline and rec['stroke'] != 'none':
-            dwg.add(dwg.path(d=rec['d'], fill=rec['fill'], stroke=rec['stroke'],
-                              stroke_width=outline_width, fill_rule='evenodd',
-                              stroke_linejoin=outline_join, stroke_linecap=outline_cap))
+            dwg.add(dwg.path(
+                d=rec['d'],
+                fill=rec['fill'],
+                stroke=rec['stroke'],
+                stroke_width=outline_width,
+                fill_rule='evenodd',
+                stroke_linejoin=outline_join,
+                stroke_linecap=outline_cap,
+            ))
         else:
             dwg.add(dwg.path(d=rec['d'], fill=rec['fill'], stroke='none', fill_rule='evenodd'))
 

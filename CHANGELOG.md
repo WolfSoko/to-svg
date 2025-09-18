@@ -13,6 +13,16 @@ The format loosely follows Keep a Changelog.
 - (planned) Additional Bezier path tests
 - (planned) JSON metadata export (palette + path stats)
 
+## [0.2.2] - 2025-09-18
+### Fixed
+- Lint-Verstöße (Import-Sortierung, Mehrfachimporte) bereinigt (Ruff E/I/F Fehler beseitigt).
+- Mypy Fehler in `quantize.py` (Sampling-Indexierung) durch explizites Casting gefixt.
+- Release Workflow mit `permissions: contents: write` versehen (403 beim Tag-Release behoben).
+
+### Internal
+- Konsistente Import-Gruppierung in allen Modulen und Tests.
+- Unnötige Importe entfernt (`numpy` in svg_builder, `pytest` in test_logging).
+
 ## [0.2.1] - 2025-09-18
 ### Fixed
 - Stabilisierte Alpha-Verarbeitung: Refaktorierter Flatten-Pfad in `alpha.py` zur Vermeidung von NumPy/Mypy Typkonflikten durch Auslagerung in `_flatten_rgba` (klarer float32 Pfad, keine gemischten `np.where`-Typen).
@@ -49,5 +59,6 @@ The format loosely follows Keep a Changelog.
 - Hole support with evenodd fill
 - Basic SVG output
 
+[0.2.2]: https://example.com/compare/v0.2.1...v0.2.2
 [0.2.1]: https://example.com/compare/v0.2.0...v0.2.1
 [0.2.0]: https://example.com/compare/v0.1.0...v0.2.0

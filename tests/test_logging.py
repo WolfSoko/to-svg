@@ -1,22 +1,24 @@
-import pathlib, sys, logging
-import numpy as np
+import logging
+import pathlib
+import sys
+
 import cv2
-import pytest
+import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+if str(SRC) not in sys.path:  # noqa: E402
+    sys.path.insert(0, str(SRC))  # noqa: E402
 
-from color_vectorize import image_to_svg  # type: ignore
+from color_vectorize import image_to_svg  # type: ignore  # noqa: E402
 
 
 def _two_color_image(path: pathlib.Path):
     h, w = 40, 80
     img = np.zeros((h, w, 3), dtype=np.uint8)
     # Left half red, right half green
-    img[:, : w//2] = (0, 0, 255)   # BGR red
-    img[:, w//2 :] = (0, 255, 0)   # BGR green
+    img[:, : w // 2] = (0, 0, 255)  # BGR red
+    img[:, w // 2 :] = (0, 255, 0)  # BGR green
     cv2.imwrite(str(path), img)
     return path
 
@@ -43,5 +45,3 @@ def test_logging_fixed_palette(caplog, tmp_path):
     txt = caplog.text
     assert "Using fixed palette" in txt
     assert "Saved SVG" in txt
-
-

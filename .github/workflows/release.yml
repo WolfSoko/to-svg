@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     runs-on: ubuntu-latest
@@ -32,4 +35,3 @@ jobs:
           body_path: RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

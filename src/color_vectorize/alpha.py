@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import cv2
 import numpy as np
+
 from .utils import parse_hex_color
 
 __all__ = ["load_image_rgba_handled"]
