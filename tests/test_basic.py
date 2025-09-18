@@ -1,6 +1,6 @@
-import sys, pathlib, re, subprocess
+# Basic tests for color_vectorize
+import sys, pathlib, subprocess
 
-# Ensure src/ is importable
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
@@ -8,27 +8,36 @@ if str(SRC) not in sys.path:
 
 from color_vectorize import image_to_svg  # type: ignore
 
+def _input_logo() -> pathlib.Path:
+    p = ROOT / "eprivacy_logo.png"
+    if not p.exists():
+        raise RuntimeError("Missing test asset: eprivacy_logo.png")
+    return p
+
+
+def test_sanity_math():
+    # Ensure pytest actually runs
+    assert 1 + 1 == 2
+
+
 def test_image_to_svg(tmp_path):
-    input_img = ROOT / "eprivacy_logo.png"
+    input_img = _input_logo()
     out_file = tmp_path / "out.svg"
     image_to_svg(str(input_img), str(out_file), n_colors=5, smooth=1, epsilon=0.5, outline=True)
     assert out_file.exists(), "SVG not created"
     txt = out_file.read_text(encoding="utf-8")
-    assert "<path" in txt, "No path elements in SVG"
+    assert "<path" in txt.lower(), "No path elements in SVG"
 
 
 def test_palette(tmp_path):
-    input_img = ROOT / "eprivacy_logo.png"
+    input_img = _input_logo()
     out_file = tmp_path / "pal.svg"
-    # Limit to 3 fixed colors
     image_to_svg(str(input_img), str(out_file), palette="#003366,#ffffff,#111111", outline=False)
     txt = out_file.read_text(encoding="utf-8")
-    # Expect only these three rgb values (allow case-insensitive search)
     assert "#003366" in txt.lower() or "rgb(0, 51, 102)" in txt.lower()
 
 
 def test_cli_help():
-    # Use wrapper script to ensure CLI works without installation
     proc = subprocess.run([sys.executable, str(ROOT / "color_vectorize.py"), "-h"], capture_output=True, text=True)
     assert proc.returncode == 0
-    assert "Vectorize" in proc.stdout or "vectorize" in proc.stdout
+    assert "vectorize" in proc.stdout.lower()
