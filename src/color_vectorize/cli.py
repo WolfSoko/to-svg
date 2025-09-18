@@ -2,6 +2,37 @@ from __future__ import annotations
 import argparse
 from .svg_builder import image_to_svg
 
+PRESETS = {
+    "smooth-contours": {
+        "smooth": 2,
+        "epsilon": 1.0,
+        "bezier": True,
+        "overlap": 1.0,
+        "outline": True,
+        "outline_width": 2.0,
+        "min_hole_area": 2.0,
+    },
+    "high-fidelity": {
+        "smooth": 0,
+        "epsilon": 0.0,
+        "bezier": False,
+        "overlap": 0.5,
+        "outline": False,
+        "min_hole_area": 1.0,
+    }
+}
+
+def apply_preset(ns: argparse.Namespace):
+    if not ns.preset:
+        return
+    cfg = PRESETS.get(ns.preset)
+    if not cfg:
+        return
+    # Overwrite parameters unconditionally (explicit preset wins)
+    for k, v in cfg.items():
+        if hasattr(ns, k):
+            setattr(ns, k, v)
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
@@ -31,10 +62,12 @@ def build_parser() -> argparse.ArgumentParser:
     add("--order", default='area-desc', choices=['area-desc','area-asc','orig'], help="Drawing order")
     add("--alpha-mode", choices=['ignore','flatten','binary'], default='ignore', help="Alpha handling mode")
     add("--alpha-threshold", type=int, default=0, help="Alpha threshold (flatten/binary modes)")
+    add("--preset", choices=list(PRESETS.keys()), help="Apply a predefined parameter set for convenience")
     return p
 
 
 def run_from_args(ns: argparse.Namespace):
+    apply_preset(ns)
     image_to_svg(
         ns.input,
         ns.output,

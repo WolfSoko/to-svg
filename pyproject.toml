@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "color-vectorize"
-version = "0.1.0"
-description = "Multi-color raster to SVG vectorization with smoothing, holes, overlap, strokes, alpha handling"
+version = "0.2.0"
+description = "Multi-color raster to SVG vectorization with smoothing, Bézier, hole support, overlap, strokes, alpha handling"
 authors = [ { name = "Your Name" } ]
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.9"
-keywords = ["svg", "vectorization", "image", "graphics"]
+keywords = ["svg", "vectorization", "image", "graphics", "noncommercial"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: Other/Proprietary License",
