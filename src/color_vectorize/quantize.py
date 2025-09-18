@@ -15,7 +15,9 @@ ColorArray = NDArray[np.uint8]
 LabelArray = NDArray[np.int32]
 
 
-def quantize_image(image: NDArray[np.uint8], n_colors: int = 8) -> tuple[ColorArray, NDArray[np.int32], ColorArray]:
+def quantize_image(
+    image: NDArray[np.uint8], n_colors: int = 8
+) -> tuple[ColorArray, NDArray[np.int32], ColorArray]:
     """Quantize image to up to n_colors using KMeans.
 
     Returns: (quantized_rgb, label_2d, palette_array)
@@ -37,8 +39,7 @@ def quantize_image(image: NDArray[np.uint8], n_colors: int = 8) -> tuple[ColorAr
     k = max(1, min(n_colors, distinct))
     if k < n_colors:
         logger.info(
-            "Reduced requested clusters from %d to %d (distinct colors=%d)",
-            n_colors, k, distinct
+            "Reduced requested clusters from %d to %d (distinct colors=%d)", n_colors, k, distinct
         )
     else:
         logger.debug("Using %d clusters (distinct colors=%d)", k, distinct)
@@ -51,7 +52,9 @@ def quantize_image(image: NDArray[np.uint8], n_colors: int = 8) -> tuple[ColorAr
     return quant, labels_1d.reshape(image.shape[:2]), palette
 
 
-def quantize_with_palette(image: NDArray[np.uint8], palette_list) -> tuple[ColorArray, NDArray[np.int32], ColorArray]:
+def quantize_with_palette(
+    image: NDArray[np.uint8], palette_list
+) -> tuple[ColorArray, NDArray[np.int32], ColorArray]:
     palette: ColorArray = np.array(palette_list, dtype=np.uint8)
     logger.info("Using fixed palette of size %d", int(palette.shape[0]))
     img_flat = image.reshape(-1, 3).astype(np.int16)

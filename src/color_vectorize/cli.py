@@ -22,8 +22,9 @@ PRESETS = {
         "overlap": 0.5,
         "outline": False,
         "min_hole_area": 1.0,
-    }
+    },
 }
+
 
 def apply_preset(ns: argparse.Namespace):
     if not ns.preset:
@@ -44,7 +45,12 @@ def build_parser() -> argparse.ArgumentParser:
     add = p.add_argument
     add("input", help="Input raster image (PNG/JPG)")
     add("output", help="Output SVG path")
-    add("--colors", type=int, default=8, help="Number of color clusters (ignored if --palette is set)")
+    add(
+        "--colors",
+        type=int,
+        default=8,
+        help="Number of color clusters (ignored if --palette is set)",
+    )
     add("--palette", help="Comma separated fixed palette hex colors, e.g. #112233,#445566,#aabbcc")
     add("--min-area", type=float, default=50, help="Min outer contour area")
     add("--min-hole-area", type=float, default=5, help="Min hole (inner contour) area")
@@ -56,17 +62,46 @@ def build_parser() -> argparse.ArgumentParser:
     add("--epsilon", type=float, default=0.0, help="Douglas-Peucker tolerance (0 = off)")
     add("--bezier", action="store_true", help="Convert polylines to cubic Bézier")
     add("--outline", action="store_true", help="Add stroke around each filled region")
-    add("--outline-color", default='auto', help="Stroke color or 'auto'")
+    add("--outline-color", default="auto", help="Stroke color or 'auto'")
     add("--outline-width", type=float, default=1.5, help="Stroke width for region outlines")
-    add("--outline-join", default='round', choices=['miter','round','bevel'], help="Stroke line join style")
-    add("--outline-cap", default='round', choices=['butt','round','square'], help="Stroke line cap style")
+    add(
+        "--outline-join",
+        default="round",
+        choices=["miter", "round", "bevel"],
+        help="Stroke line join style",
+    )
+    add(
+        "--outline-cap",
+        default="round",
+        choices=["butt", "round", "square"],
+        help="Stroke line cap style",
+    )
     add("--overlap", type=float, default=0.0, help="Mask dilation in px to remove hairline gaps")
     add("--precision", type=int, default=3, help="Decimal precision for coordinates")
-    add("--order", default='area-desc', choices=['area-desc','area-asc','orig'], help="Drawing order")
-    add("--alpha-mode", choices=['ignore','flatten','binary'], default='ignore', help="Alpha handling mode")
+    add(
+        "--order",
+        default="area-desc",
+        choices=["area-desc", "area-asc", "orig"],
+        help="Drawing order",
+    )
+    add(
+        "--alpha-mode",
+        choices=["ignore", "flatten", "binary"],
+        default="ignore",
+        help="Alpha handling mode",
+    )
     add("--alpha-threshold", type=int, default=0, help="Alpha threshold (flatten/binary modes)")
-    add("--preset", choices=list(PRESETS.keys()), help="Apply a predefined parameter set for convenience")
-    add("--log-level", default="INFO", choices=["CRITICAL","ERROR","WARNING","INFO","DEBUG"], help="Logging verbosity")
+    add(
+        "--preset",
+        choices=list(PRESETS.keys()),
+        help="Apply a predefined parameter set for convenience",
+    )
+    add(
+        "--log-level",
+        default="INFO",
+        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
+        help="Logging verbosity",
+    )
     return p
 
 

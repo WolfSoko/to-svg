@@ -11,6 +11,7 @@ __all__ = [
     "prepare_points",
 ]
 
+
 def chaikin(points: np.ndarray, iterations: int):
     pts = points.astype(float)
     for _ in range(int(max(0, iterations))):
@@ -24,8 +25,10 @@ def chaikin(points: np.ndarray, iterations: int):
         pts = np.array(new_pts)
     return pts
 
+
 def fmt_point(p, precision: int):
     return f"{p[0]:.{precision}f} {p[1]:.{precision}f}"
+
 
 def poly_to_cubic_beziers(points: np.ndarray, precision: int):
     path = f"M {fmt_point(points[0], precision)} "
@@ -34,12 +37,12 @@ def poly_to_cubic_beziers(points: np.ndarray, precision: int):
         p1 = points[i]
         c1 = p0 + (p1 - p0) / 3.0
         c2 = p0 + 2 * (p1 - p0) / 3.0
-        path += ("C "
-                 f"{fmt_point(c1, precision)} "
-                 f"{fmt_point(c2, precision)} "
-                 f"{fmt_point(p1, precision)} ")
+        path += (
+            f"C {fmt_point(c1, precision)} {fmt_point(c2, precision)} {fmt_point(p1, precision)} "
+        )
     path += "Z"
     return path
+
 
 def contour_points_to_path(points: np.ndarray, bezier: bool = False, precision: int = 2):
     if bezier:
@@ -50,8 +53,10 @@ def contour_points_to_path(points: np.ndarray, bezier: bool = False, precision: 
     d += "Z"
     return d
 
+
 def prepare_points(cnt: np.ndarray, epsilon: float = 0.0, smooth: int = 0):
     from .geometry import chaikin  # local import for clarity
+
     pts = cnt.squeeze()
     if pts.ndim != 2:
         return None
