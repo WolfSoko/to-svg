@@ -13,6 +13,13 @@ The format loosely follows Keep a Changelog.
 - (planned) Additional Bezier path tests
 - (planned) JSON metadata export (palette + path stats)
 
+## [0.2.1] - 2025-09-18
+### Fixed
+- Stabilisierte Alpha-Verarbeitung: Refaktorierter Flatten-Pfad in `alpha.py` zur Vermeidung von NumPy/Mypy Typkonflikten durch Auslagerung in `_flatten_rgba` (klarer float32 Pfad, keine gemischten `np.where`-Typen).
+
+### Internal
+- Typing-Härtung (mypy jetzt clean für `alpha.py`).
+
 ## [0.2.0] - 2025-09-18
 ### Added
 - Presets (`smooth-contours`, `high-fidelity`)
@@ -42,5 +49,5 @@ The format loosely follows Keep a Changelog.
 - Hole support with evenodd fill
 - Basic SVG output
 
+[0.2.1]: https://example.com/compare/v0.2.0...v0.2.1
 [0.2.0]: https://example.com/compare/v0.1.0...v0.2.0
-
