@@ -1,5 +1,6 @@
 from __future__ import annotations
 import argparse
+import logging
 from .svg_builder import image_to_svg
 
 PRESETS = {
@@ -63,10 +64,21 @@ def build_parser() -> argparse.ArgumentParser:
     add("--alpha-mode", choices=['ignore','flatten','binary'], default='ignore', help="Alpha handling mode")
     add("--alpha-threshold", type=int, default=0, help="Alpha threshold (flatten/binary modes)")
     add("--preset", choices=list(PRESETS.keys()), help="Apply a predefined parameter set for convenience")
+    add("--log-level", default="INFO", choices=["CRITICAL","ERROR","WARNING","INFO","DEBUG"], help="Logging verbosity")
     return p
 
 
+def configure_logging(level_name: str):
+    level = getattr(logging, level_name.upper(), logging.INFO)
+    root = logging.getLogger()
+    if not root.handlers:
+        logging.basicConfig(level=level, format="%(levelname)s %(name)s: %(message)s")
+    else:
+        root.setLevel(level)
+
+
 def run_from_args(ns: argparse.Namespace):
+    configure_logging(ns.log_level)
     apply_preset(ns)
     image_to_svg(
         ns.input,

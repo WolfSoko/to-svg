@@ -92,6 +92,30 @@ Fixed palette (brand colors only):
 python -m color_vectorize.cli eprivacy_logo.png brand.svg --palette #003366,#ffffff,#111111 --smooth 1 --epsilon 0.8
 ```
 
+## Logging
+Use the `--log-level` flag for verbosity control:
+```
+--log-level INFO    # default concise progress
+--log-level DEBUG   # detailed internal steps (paths, palette, reductions)
+```
+Example:
+```bash
+python -m color_vectorize.cli input.png out.svg --colors 20 --log-level DEBUG
+```
+Typical log events:
+- Quantization cluster reduction (INFO)
+- Fixed palette usage (INFO)
+- Per-color path counts (DEBUG)
+- Final saved SVG path count (INFO)
+
+For programmatic use:
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+from color_vectorize import image_to_svg
+image_to_svg('input.png', 'out.svg', n_colors=12)
+```
+
 ## Architecture Overview
 ```
 color_vectorize/
