@@ -32,3 +32,9 @@ htmlcov/
 *.tmp.svg
 examples/output/
 
+# Demo / sample artifacts (cleaned from repo)
+demo_*.svg
+api_test.svg
+sample_output.svg
+tmp_test.svg
+good_results/

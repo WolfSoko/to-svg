@@ -17,9 +17,9 @@ python -m venv .venv
 .venv\\Scripts\\activate  # PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 # Run via module (dev mode):
-python -m color_vectorize.cli eprivacy_logo.png out.svg --preset smooth-contours
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png out.svg --preset smooth-contours
 # Or after editable install:
-color-vectorize eprivacy_logo.png out.svg --preset smooth-contours
+color-vectorize examples/assets/eprivacy_logo.png out.svg --preset smooth-contours
 ```
 
 ## CLI Highlights
@@ -52,13 +52,13 @@ color-vectorize eprivacy_logo.png out.svg --preset smooth-contours
 
 Use a preset then optionally override parameters:
 ```bash
-python -m color_vectorize.cli eprivacy_logo.png styled.svg --preset smooth-contours --colors 8 --outline-color auto
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png styled.svg --preset smooth-contours --colors 8 --outline-color auto
 ```
 
 ## Combining Color Fill + High Quality Outline
 If you already produced a precise monocolor outline (e.g. `eprivacy_logo.svg`), you can stack it over the multi-color result:
 ```bash
-python -m color_vectorize.cli eprivacy_logo.png color.svg --colors 8 --smooth 2 --epsilon 1.0 --bezier --overlap 1 --supercontour eprivacy_logo.svg --contour-width 2
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png color.svg --colors 8 --smooth 2 --epsilon 1.0 --bezier --overlap 1 --supercontour examples/assets/eprivacy_logo.svg --contour-width 2
 ```
 This yields smooth colored regions plus the crisp outline paths.
 
@@ -71,25 +71,25 @@ This yields smooth colored regions plus the crisp outline paths.
 ## Capturing Small Holes (e.g. Eyes)
 If tiny interior holes (eyes) disappear, reduce `--min-hole-area`, e.g.:
 ```bash
-python -m color_vectorize.cli eprivacy_logo.png out.svg --min-hole-area 2 --smooth 1 --epsilon 0.8
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png out.svg --min-hole-area 2 --smooth 1 --epsilon 0.8
 ```
 
 ## Typical Recipes
 Smooth pleasant illustration:
 ```bash
-python -m color_vectorize.cli eprivacy_logo.png smooth.svg --preset smooth-contours --colors 8
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png smooth.svg --preset smooth-contours --colors 8
 ```
 High precision technical logo:
 ```bash
-python -m color_vectorize.cli eprivacy_logo.png tech.svg --colors 10 --smooth 0 --epsilon 0 --bezier --overlap 0.5 --precision 5
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png tech.svg --colors 10 --smooth 0 --epsilon 0 --bezier --overlap 0.5 --precision 5
 ```
 Dark auto-strokes:
 ```bash
-python -m color_vectorize.cli eprivacy_logo.png outlined.svg --outline --outline-color auto --outline-width 2 --overlap 1
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png outlined.svg --outline --outline-color auto --outline-width 2 --overlap 1
 ```
 Fixed palette (brand colors only):
 ```bash
-python -m color_vectorize.cli eprivacy_logo.png brand.svg --palette #003366,#ffffff,#111111 --smooth 1 --epsilon 0.8
+python -m color_vectorize.cli examples/assets/eprivacy_logo.png brand.svg --palette #003366,#ffffff,#111111 --smooth 1 --epsilon 0.8
 ```
 
 ## Logging
@@ -161,3 +161,5 @@ Vector output is heuristic; manual post-edit in an SVG editor may further improv
 
 ## Note about removed wrapper
 The previous top-level `color_vectorize.py` wrapper file was removed to avoid namespace conflicts. Use module invocation (`python -m color_vectorize.cli`) or the installed entry point `color-vectorize`.
+
+Note: The bundled sample image now resides under `examples/assets/eprivacy_logo.png`. You can remove it or replace it with your own assets; it is included for quick experimentation.
