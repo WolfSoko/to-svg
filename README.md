@@ -163,3 +163,13 @@ Vector output is heuristic; manual post-edit in an SVG editor may further improv
 The previous top-level `color_vectorize.py` wrapper file was removed to avoid namespace conflicts. Use module invocation (`python -m color_vectorize.cli`) or the installed entry point `color-vectorize`.
 
 Note: The bundled sample image now resides under `examples/assets/eprivacy_logo.png`. You can remove it or replace it with your own assets; it is included for quick experimentation.
+
+## Continuous Integration
+GitHub Actions run tests, type checking, linting and build on pushes & PRs to `main` across Python 3.9–3.13.
+
+Badges (replace OWNER/REPO):
+```
+![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
+![Lint](https://github.com/OWNER/REPO/actions/workflows/lint.yml/badge.svg)
+```
+Replace OWNER/REPO with your GitHub namespace.
