@@ -1,0 +1,37 @@
+zen# Python Bytecode / Caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build / Dist
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs / Temp
+*.log
+*.tmp
+*.cache
+
+# Tools / IDE
+.vscode/
+.idea/
+.mypy_cache/
+.pytest_cache/
+coverage.html
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Others
+.DS_Store
+Thumbs.db
+
