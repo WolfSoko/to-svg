@@ -38,6 +38,7 @@ def test_palette(tmp_path):
 
 
 def test_cli_help():
-    proc = subprocess.run([sys.executable, str(ROOT / "color_vectorize.py"), "-h"], capture_output=True, text=True)
+    # Aufruf über Modul statt über entfernte Wrapper-Datei
+    proc = subprocess.run([sys.executable, "-m", "color_vectorize.cli", "-h"], capture_output=True, text=True)
     assert proc.returncode == 0
     assert "vectorize" in proc.stdout.lower()

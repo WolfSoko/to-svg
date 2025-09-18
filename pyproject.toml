@@ -43,3 +43,7 @@ python_version = "3.11"
 packages = ["color_vectorize"]
 ignore_missing_imports = true
 strict = false
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
